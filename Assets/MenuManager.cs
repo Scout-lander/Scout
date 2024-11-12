@@ -7,6 +7,8 @@ using FishNet.Managing;
 using FishNet.Transporting;
 using FishNet.Managing.Scened;
 using FishNet.Object;
+using System.Linq;
+
 
 public class MenuManager : NetworkBehaviour
 {
@@ -30,6 +32,7 @@ public class MenuManager : NetworkBehaviour
     [SerializeField] private NetworkManager networkManager; // Reference to FishNet NetworkManager
     [SerializeField] private string gameSceneName = "Game"; // The name of the game scene to load
 
+    private Dictionary<UserData, bool> _playerReadyStates = new(); // Track each player's ready state
     private Dictionary<UserData, LobbyUserPanel> _lobbyUserPanels = new();
 
     private void Awake()
@@ -45,6 +48,7 @@ public class MenuManager : NetworkBehaviour
     {
         lobbyData.Name = UserData.Me.Name + "'s Lobby";
         lobbyTitle.text = lobbyData.Name;
+        _playerReadyStates.Clear();
 
         // Convert SteamId to a ulong and then to a shorter Base64 string for display
         string shortRoomId = ConvertRoomIdToBase64(lobbyData.SteamId.m_SteamID);
@@ -66,6 +70,13 @@ public class MenuManager : NetworkBehaviour
         roomIDDisplay.text = "Room ID: " + shortRoomId;
 
         OpenLobby();
+
+        _playerReadyStates.Clear(); // Clear ready states when joining a new lobby
+        foreach (var member in lobbyData.Members)
+        {
+            SetupCard(member.user);
+            _playerReadyStates[member.user] = false; // Initialize all players as not ready
+        }
         UpdateStartButton();
 
         foreach (var member in lobbyData.Members)
@@ -90,9 +101,23 @@ public class MenuManager : NetworkBehaviour
         ChangeToGameScene();
     }
 
+
+    public void OnUserReadyStatusChanged(UserData userData, bool isReady)
+    {
+        _playerReadyStates[userData] = isReady; // Update the user's ready status
+        CheckAllPlayersReady(); // Re-evaluate if all players are ready
+    }
+
+    private void CheckAllPlayersReady()
+    {
+        // Only enable start button if all players are ready and the host is the current player
+        bool allReady = _playerReadyStates.Values.All(ready => ready);
+        startGameButton.gameObject.SetActive(lobbyManager.IsPlayerOwner && allReady);
+    }
+
     public void OnStartGameButtonPressed()
     {
-        if (lobbyManager.IsPlayerOwner)
+        if (lobbyManager.IsPlayerOwner && _playerReadyStates.Values.All(ready => ready))
         {
             Debug.Log("Starting the game as host...");
             networkManager.ServerManager.StartConnection();
@@ -148,6 +173,8 @@ public class MenuManager : NetworkBehaviour
     public void OnUserJoin(UserData userData)
     {
         SetupCard(userData);
+        _playerReadyStates[userData] = false; // Set the new user as not ready
+        UpdateStartButton();
     }
 
     private void OnUserLeft(UserLobbyLeaveData userLeaveData)
