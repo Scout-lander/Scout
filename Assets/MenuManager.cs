@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using HeathenEngineering.SteamworksIntegration;
 using TMPro;
 using UnityEngine;
@@ -7,8 +8,6 @@ using FishNet.Managing;
 using FishNet.Transporting;
 using FishNet.Managing.Scened;
 using FishNet.Object;
-using System.Linq;
-
 
 public class MenuManager : NetworkBehaviour
 {
@@ -78,14 +77,11 @@ public class MenuManager : NetworkBehaviour
             _playerReadyStates[member.user] = false; // Initialize all players as not ready
         }
         UpdateStartButton();
-
-        foreach (var member in lobbyData.Members)
-            SetupCard(member.user);
     }
 
     public void UpdateStartButton()
     {
-        startGameButton.gameObject.SetActive(lobbyManager.IsPlayerOwner);
+        CheckAllPlayersReady();
     }
 
     public void OpenMainMenu()
@@ -100,7 +96,6 @@ public class MenuManager : NetworkBehaviour
         networkManager.ClientManager.StartConnection();
         ChangeToGameScene();
     }
-
 
     public void OnUserReadyStatusChanged(UserData userData, bool isReady)
     {
@@ -117,6 +112,7 @@ public class MenuManager : NetworkBehaviour
 
     public void OnStartGameButtonPressed()
     {
+        // Final check to ensure all players are ready before starting
         if (lobbyManager.IsPlayerOwner && _playerReadyStates.Values.All(ready => ready))
         {
             Debug.Log("Starting the game as host...");
@@ -125,6 +121,10 @@ public class MenuManager : NetworkBehaviour
 
             StartGameClientRpc();
             ChangeToGameScene();
+        }
+        else
+        {
+            Debug.LogWarning("Cannot start the game; not all players are ready.");
         }
     }
 
@@ -187,6 +187,8 @@ public class MenuManager : NetworkBehaviour
 
         Destroy(panel.gameObject);
         _lobbyUserPanels.Remove(userLeaveData.user);
+        _playerReadyStates.Remove(userLeaveData.user); // Remove from ready states
+        CheckAllPlayersReady(); // Re-evaluate if all players are ready
     }
 
     private void ClearCards()
