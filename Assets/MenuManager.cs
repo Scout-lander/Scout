@@ -63,7 +63,7 @@ public class MenuManager : NetworkBehaviour
         
         OpenLobby();
         UpdateStartButton();
-        SetupCard(UserData.Me);
+        //SetupCard(UserData.Me);
 
         foreach (var member in lobbyData.Members)
             SetupCard(member.user);
