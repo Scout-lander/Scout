@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using HeathenEngineering.SteamworksIntegration;
 using TMPro;
@@ -6,10 +5,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using FishNet.Managing;
 using FishNet.Transporting;
-using UnityEngine.SceneManagement;
 using FishNet.Managing.Scened;
 using FishNet.Object;
-using Unity.VisualScripting;
 
 public class MenuManager : NetworkBehaviour
 {
@@ -28,28 +25,30 @@ public class MenuManager : NetworkBehaviour
     [Header("User Lobby Setup")]
     [SerializeField] private LobbyUserPanel lobbyUserPanelPrefab;
     [SerializeField] private Transform lobbyuserHolder;
- 
+
     [Header("Network")]
     [SerializeField] private NetworkManager networkManager; // Reference to FishNet NetworkManager
     [SerializeField] private string gameSceneName = "Game"; // The name of the game scene to load
 
     private Dictionary<UserData, LobbyUserPanel> _lobbyUserPanels = new();
 
-    public void Awake()
+    private void Awake()
     {
         OpenMainMenu();
         HeathenEngineering.SteamworksIntegration.API.Overlay.Client.EventGameLobbyJoinRequested.AddListener(OverlayJoinButton);
 
-        // Check if the local user is the host
         UpdateStartButton();
+        joinRoomButton.onClick.AddListener(JoinRoomByID);
+        
+       
     }
 
     public void OnLobbyCreated(LobbyData lobbyData)
     {
         lobbyData.Name = UserData.Me.Name + "'s Lobby";
         lobbyTitle.text = lobbyData.Name;
-        roomIDDisplay.text = "Room ID: " + lobbyData.SteamId.ToString(); // Set room ID display
-
+        roomIDDisplay.text = "Room ID: " + lobbyData.SteamId.ToString();
+        
         ClearCards();
         OpenLobby();
         SetupCard(UserData.Me);
@@ -60,10 +59,11 @@ public class MenuManager : NetworkBehaviour
     {
         ClearCards();
         lobbyTitle.text = lobbyData.Name;
-        roomIDDisplay.text = "Room ID: " + lobbyData.SteamId.ToString(); // Set room ID display
+        roomIDDisplay.text = "Room ID: " + lobbyData.SteamId.ToString();
+        
         OpenLobby();
         UpdateStartButton();
-        OnUserJoin(UserData.Me);
+        SetupCard(UserData.Me);
 
         foreach (var member in lobbyData.Members)
             SetupCard(member.user);
@@ -71,7 +71,6 @@ public class MenuManager : NetworkBehaviour
 
     public void UpdateStartButton()
     {
-        // Only display the Start Game button if the local player is the host
         startGameButton.gameObject.SetActive(lobbyManager.IsPlayerOwner);
     }
 
@@ -84,7 +83,6 @@ public class MenuManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void StartGameClientRpc()
     {
-        // Client action to start connection
         networkManager.ClientManager.StartConnection();
         ChangeToGameScene();
     }
@@ -94,29 +92,23 @@ public class MenuManager : NetworkBehaviour
         if (lobbyManager.IsPlayerOwner)
         {
             Debug.Log("Starting the game as host...");
-            networkManager.ServerManager.StartConnection(); // Start the server with FishNet
-
-            // Connect the host to the server as a client
+            networkManager.ServerManager.StartConnection();
             networkManager.ClientManager.StartConnection();
 
-            // Send a command to all clients to start the game
             StartGameClientRpc();
-
-            // Change scene for all players
             ChangeToGameScene();
         }
     }
 
     public void ChangeToGameScene()
-{
-    SceneLoadData sceneLoadData = new SceneLoadData(gameSceneName)
     {
-        ReplaceScenes = ReplaceOption.All
-    };
+        SceneLoadData sceneLoadData = new SceneLoadData(gameSceneName)
+        {
+            ReplaceScenes = ReplaceOption.All
+        };
 
-    // Request a scene change to the game scene
-    NetworkManager.SceneManager.LoadGlobalScenes(sceneLoadData);
-}
+        networkManager.SceneManager.LoadGlobalScenes(sceneLoadData);
+    }
 
     public void OpenLobby()
     {
@@ -139,7 +131,6 @@ public class MenuManager : NetworkBehaviour
     {
         if (ulong.TryParse(roomIDInput.text, out ulong roomId))
         {
-            // Attempt to join the lobby with the entered Room ID
             lobbyManager.Join(roomId);
         }
         else
@@ -148,15 +139,16 @@ public class MenuManager : NetworkBehaviour
         }
     }
 
-    private void OnUserJoin(UserData userData)
+    public void OnUserJoin(UserData userData)
     {
         SetupCard(userData);
     }
-    public void  OnUserLeft(UserLobbyLeaveData userLeaveData)
+
+    private void OnUserLeft(UserLobbyLeaveData userLeaveData)
     {
         if(!_lobbyUserPanels.TryGetValue(userLeaveData.user, out LobbyUserPanel panel))
         {
-            Debug.LogError("Tried to remove user that dosent exist");
+            Debug.LogError("Tried to remove user that doesn't exist");
             return;
         }
 
@@ -177,7 +169,6 @@ public class MenuManager : NetworkBehaviour
     {
         var userPanel = Instantiate(lobbyUserPanelPrefab, lobbyuserHolder);
         userPanel.Initialize(userData);
-
         _lobbyUserPanels.TryAdd(userData, userPanel);
     }
 }
