@@ -421,8 +421,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   avatarImage: {fileID: 9056795305189662830}
   nameText: {fileID: 7104327556525566956}
-  readyButton: {fileID: 7462302717698469071}
-  panelBackground: {fileID: 8585480934664694588}
+  readyIndicator: {fileID: 8585480934664694588}
 --- !u!1 &7276036757393188186
 GameObject:
   m_ObjectHideFlags: 0

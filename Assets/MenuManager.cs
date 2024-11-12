@@ -10,8 +10,6 @@ using FishNet.Object;
 
 public class MenuManager : NetworkBehaviour
 {
-    public static MenuManager Instance { get; private set; } // Singleton reference
-
     [Header("Main")]
     [SerializeField] private GameObject mainMenuObject;
     [SerializeField] private TMP_InputField roomIDInput;
@@ -33,12 +31,9 @@ public class MenuManager : NetworkBehaviour
     [SerializeField] private string gameSceneName = "Game"; // The name of the game scene to load
 
     private Dictionary<UserData, LobbyUserPanel> _lobbyUserPanels = new();
-    private Dictionary<UserData, bool> playerReadyStatus = new();
-
 
     private void Awake()
     {
-        Instance = this; // Set singleton instance
         OpenMainMenu();
         HeathenEngineering.SteamworksIntegration.API.Overlay.Client.EventGameLobbyJoinRequested.AddListener(OverlayJoinButton);
 
@@ -46,11 +41,12 @@ public class MenuManager : NetworkBehaviour
         joinRoomButton.onClick.AddListener(JoinRoomByID);
     }
 
-     public void OnLobbyCreated(LobbyData lobbyData)
+    public void OnLobbyCreated(LobbyData lobbyData)
     {
         lobbyData.Name = UserData.Me.Name + "'s Lobby";
         lobbyTitle.text = lobbyData.Name;
 
+        // Convert SteamId to a ulong and then to a shorter Base64 string for display
         string shortRoomId = ConvertRoomIdToBase64(lobbyData.SteamId.m_SteamID);
         roomIDDisplay.text = "Room ID: " + shortRoomId;
 
@@ -65,6 +61,7 @@ public class MenuManager : NetworkBehaviour
         ClearCards();
         lobbyTitle.text = lobbyData.Name;
 
+        // Convert SteamId to a ulong and then to a shorter Base64 string for display
         string shortRoomId = ConvertRoomIdToBase64(lobbyData.SteamId.m_SteamID);
         roomIDDisplay.text = "Room ID: " + shortRoomId;
 
@@ -75,7 +72,7 @@ public class MenuManager : NetworkBehaviour
             SetupCard(member.user);
     }
 
-     public void UpdateStartButton()
+    public void UpdateStartButton()
     {
         startGameButton.gameObject.SetActive(lobbyManager.IsPlayerOwner);
     }
@@ -178,41 +175,7 @@ public class MenuManager : NetworkBehaviour
     {
         var userPanel = Instantiate(lobbyUserPanelPrefab, lobbyuserHolder);
         userPanel.Initialize(userData);
-        _lobbyUserPanels[userData] = userPanel;
-        playerReadyStatus[userData] = false; // Initially mark each player as not ready
-    }
-
-    // Called by LobbyUserPanel when a player toggles their ready state
-    public void OnPlayerReadyStateChanged(LobbyUserPanel userPanel)
-    {
-        // Find the user associated with this panel and update their ready status
-        foreach (var entry in _lobbyUserPanels)
-        {
-            if (entry.Value == userPanel)
-            {
-                playerReadyStatus[entry.Key] = userPanel.IsReady;
-                CheckAllPlayersReady();
-                break;
-            }
-        }
-    }
-
-    private void CheckAllPlayersReady()
-    {
-        bool allReady = true;
-
-        // Check if all players are ready
-        foreach (bool isReady in playerReadyStatus.Values)
-        {
-            if (!isReady)
-            {
-                allReady = false;
-                break;
-            }
-        }
-
-        // Enable the start game button only if all players are ready and the local player is the host
-        startGameButton.interactable = allReady && lobbyManager.IsPlayerOwner;
+        _lobbyUserPanels.TryAdd(userData, userPanel);
     }
 
     // Convert the room ID to a Base64 string for shorter display
