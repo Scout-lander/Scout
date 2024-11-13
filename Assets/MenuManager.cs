@@ -47,7 +47,7 @@ public class MenuManager : NetworkBehaviour
         UpdateStartButton();
         joinRoomButton.onClick.AddListener(JoinRoomByID);
 
-        partyLobbyControl.OnPlayerReadyStatusChanged += OnUserReadyStatusChanged;
+        //partyLobbyControl.OnPlayerReadyStatusChanged += OnUserReadyStatusChanged;
     }
 
     public void OnLobbyCreated(LobbyData lobbyData)
@@ -126,7 +126,7 @@ public class MenuManager : NetworkBehaviour
 
     public void OnStartGameButtonPressed()
     {
-        if (lobbyManager.IsPlayerOwner && _playerReadyStates.Values.All(ready => ready))
+        if (lobbyManager.IsPlayerOwner && partyLobbyControl.allReady)
         {
             Debug.Log("Starting the game as host...");
             networkManager.ServerManager.StartConnection();
