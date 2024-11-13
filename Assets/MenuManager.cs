@@ -44,7 +44,6 @@ public class MenuManager : NetworkBehaviour
         OpenMainMenu();
         HeathenEngineering.SteamworksIntegration.API.Overlay.Client.EventGameLobbyJoinRequested.AddListener(OverlayJoinButton);
 
-        UpdateStartButton();
         joinRoomButton.onClick.AddListener(JoinRoomByID);
 
         //partyLobbyControl.OnPlayerReadyStatusChanged += OnUserReadyStatusChanged;
@@ -64,13 +63,6 @@ public class MenuManager : NetworkBehaviour
         ClearCards();
         OpenLobby();
         SetupCard(UserData.Me);
-        UpdateStartButton();
-    }
-
-    private void OnDestroy()
-    {
-        if (partyLobbyControl != null)
-            partyLobbyControl.OnPlayerReadyStatusChanged -= OnUserReadyStatusChanged;
     }
 
     public void OnLobbyJoined(LobbyData lobbyData)
@@ -83,20 +75,8 @@ public class MenuManager : NetworkBehaviour
         roomIDDisplay.text = "Room ID: " + shortRoomId;
 
         OpenLobby();
-
-        _playerReadyStates.Clear(); // Clear ready states when joining a new lobby
-        foreach (var member in lobbyData.Members)
-        {
-            SetupCard(member.user);
-            _playerReadyStates[member.user] = false; // Initialize all players as not ready
-        }
-        UpdateStartButton();
     }
 
-    public void UpdateStartButton()
-    {
-        CheckAllPlayersReady();
-    }
 
     public void OpenMainMenu()
     {
@@ -187,7 +167,6 @@ public class MenuManager : NetworkBehaviour
     {
         SetupCard(userData);
         _playerReadyStates[userData] = false; // Set the new user as not ready
-        UpdateStartButton();
     }
 
     private void OnUserLeft(UserLobbyLeaveData userLeaveData)
