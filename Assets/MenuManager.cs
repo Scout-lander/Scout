@@ -55,6 +55,7 @@ public class MenuManager : NetworkBehaviour
         lobbyData.Name = UserData.Me.Name + "'s Lobby";
         lobbyTitle.text = lobbyData.Name;
         _playerReadyStates.Clear();
+        //lobbyData.AllPlayersReady
 
         // Convert SteamId to a ulong and then to a shorter Base64 string for display
         string shortRoomId = ConvertRoomIdToBase64(lobbyData.SteamId.m_SteamID);
