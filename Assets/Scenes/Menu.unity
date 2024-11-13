@@ -1250,8 +1250,8 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 7830710938702047352}
   - {fileID: 2033500614}
+  - {fileID: 7830710938702047352}
   - {fileID: 882901915}
   - {fileID: 826823774}
   - {fileID: 1075895006}
@@ -3438,6 +3438,7 @@ MonoBehaviour:
   lobbyuserHolder: {fileID: 40197877}
   networkManager: {fileID: 507932173}
   gameSceneName: Game
+  partyLobbyControl: {fileID: 0}
 --- !u!4 &1818307629
 Transform:
   m_ObjectHideFlags: 0
@@ -3659,7 +3660,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1891545896}
   - component: {fileID: 1891545895}
-  - component: {fileID: 1891545897}
   m_Layer: 0
   m_Name: LobbyBehavior
   m_TagString: Untagged
@@ -3814,40 +3814,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1891545897
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1891545894}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab5d0415dd60a70468801e371fb7dec2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  userOwnerPip: {fileID: 0}
-  readyButton: {fileID: 0}
-  notReadyButton: {fileID: 0}
-  leaveButton: {fileID: 0}
-  autoJoinOnInvite: 0
-  invitePanel: {fileID: 0}
-  inviteDropdown: {fileID: 0}
-  slots: []
-  updateRichPresenceGroupData: 1
-  maxMessages: 200
-  chatPanel: {fileID: 0}
-  inputField: {fileID: 0}
-  scrollView: {fileID: 0}
-  messageRoot: {fileID: 0}
-  myChatTemplate: {fileID: 0}
-  theirChatTemplate: {fileID: 0}
-  evtSessionLobbyInvite:
-    m_PersistentCalls:
-      m_Calls: []
-  evtGroupLobbyInvite:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1001 &2000458240
 PrefabInstance:
   m_ObjectHideFlags: 0

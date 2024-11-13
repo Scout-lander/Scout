@@ -8,6 +8,7 @@ using FishNet.Managing;
 using FishNet.Transporting;
 using FishNet.Managing.Scened;
 using FishNet.Object;
+using HeathenEngineering.SteamworksIntegration.UI;
 
 public class MenuManager : NetworkBehaviour
 {
@@ -31,6 +32,10 @@ public class MenuManager : NetworkBehaviour
     [SerializeField] private NetworkManager networkManager; // Reference to FishNet NetworkManager
     [SerializeField] private string gameSceneName = "Game"; // The name of the game scene to load
 
+    [Header("Party Lobby Control")]
+    [SerializeField] private PartyLobbyControl partyLobbyControl; // Reference to PartyLobbyControl
+
+
     private Dictionary<UserData, bool> _playerReadyStates = new(); // Track each player's ready state
     private Dictionary<UserData, LobbyUserPanel> _lobbyUserPanels = new();
 
@@ -41,6 +46,8 @@ public class MenuManager : NetworkBehaviour
 
         UpdateStartButton();
         joinRoomButton.onClick.AddListener(JoinRoomByID);
+
+        partyLobbyControl.OnPlayerReadyStatusChanged += OnUserReadyStatusChanged;
     }
 
     public void OnLobbyCreated(LobbyData lobbyData)
@@ -57,6 +64,12 @@ public class MenuManager : NetworkBehaviour
         OpenLobby();
         SetupCard(UserData.Me);
         UpdateStartButton();
+    }
+
+    private void OnDestroy()
+    {
+        if (partyLobbyControl != null)
+            partyLobbyControl.OnPlayerReadyStatusChanged -= OnUserReadyStatusChanged;
     }
 
     public void OnLobbyJoined(LobbyData lobbyData)
@@ -100,19 +113,18 @@ public class MenuManager : NetworkBehaviour
     public void OnUserReadyStatusChanged(UserData userData, bool isReady)
     {
         _playerReadyStates[userData] = isReady; // Update the user's ready status
+    Debug.Log($"User: {userData.Name}, Ready Status: {isReady}");
         CheckAllPlayersReady(); // Re-evaluate if all players are ready
     }
 
     private void CheckAllPlayersReady()
     {
-        // Only enable start button if all players are ready and the host is the current player
         bool allReady = _playerReadyStates.Values.All(ready => ready);
         startGameButton.gameObject.SetActive(lobbyManager.IsPlayerOwner && allReady);
     }
 
     public void OnStartGameButtonPressed()
     {
-        // Final check to ensure all players are ready before starting
         if (lobbyManager.IsPlayerOwner && _playerReadyStates.Values.All(ready => ready))
         {
             Debug.Log("Starting the game as host...");
