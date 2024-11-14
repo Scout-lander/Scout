@@ -34,10 +34,9 @@ public class MenuManager : NetworkBehaviour
 
     [Header("Party Lobby Control")]
     [SerializeField] private PartyLobbyControl partyLobbyControl; // Reference to PartyLobbyControl
+    private HashSet<ulong> confirmedClients = new HashSet<ulong>(); // Track confirmed clients
 
 
-    private Dictionary<UserData, bool> _playerReadyStates = new(); // Track each player's ready state
-    private Dictionary<UserData, LobbyUserPanel> _lobbyUserPanels = new();
 
     private void Awake()
     {
@@ -46,28 +45,25 @@ public class MenuManager : NetworkBehaviour
 
         joinRoomButton.onClick.AddListener(JoinRoomByID);
 
-        //partyLobbyControl.OnPlayerReadyStatusChanged += OnUserReadyStatusChanged;
+
     }
 
     public void OnLobbyCreated(LobbyData lobbyData)
     {
         lobbyData.Name = UserData.Me.Name + "'s Lobby";
         lobbyTitle.text = lobbyData.Name;
-        _playerReadyStates.Clear();
-        //lobbyData.AllPlayersReady
 
         // Convert SteamId to a ulong and then to a shorter Base64 string for display
         string shortRoomId = ConvertRoomIdToBase64(lobbyData.SteamId.m_SteamID);
         roomIDDisplay.text = "Room ID: " + shortRoomId;
 
-        ClearCards();
         OpenLobby();
         SetupCard(UserData.Me);
     }
 
+
     public void OnLobbyJoined(LobbyData lobbyData)
     {
-        ClearCards();
         lobbyTitle.text = lobbyData.Name;
 
         // Convert SteamId to a ulong and then to a shorter Base64 string for display
@@ -77,11 +73,40 @@ public class MenuManager : NetworkBehaviour
         OpenLobby();
     }
 
-
     public void OpenMainMenu()
     {
         CloseScreen();
         mainMenuObject.SetActive(true);
+    }
+
+    public void OnStartGameButtonPressed()
+    {
+        if (lobbyManager.IsPlayerOwner && partyLobbyControl.allReady)
+        {
+            Debug.Log("Starting the game as host...");
+            networkManager.ServerManager.StartConnection();
+
+            if (lobbyManager.Lobby.Members.Length == 1) // Solo case
+            {
+                ChangeToGameScene();
+            }
+            else
+            {
+                partyLobbyControl.SetLobbyGameReady(); // Set lobby to "game ready"
+                NotifyClientsToStartConnection();
+            }
+        }
+        else
+        {
+            Debug.LogWarning("Cannot start the game; not all players are ready.");
+        }
+    }
+
+    [ObserversRpc]
+    private void NotifyClientsToStartConnection()
+    {
+        Debug.Log("Notifying clients to connect to FishNet...");
+        StartGameClientRpc(); // Clients will now connect and change scenes
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -91,33 +116,16 @@ public class MenuManager : NetworkBehaviour
         ChangeToGameScene();
     }
 
-    public void OnUserReadyStatusChanged(UserData userData, bool isReady)
+    [ServerRpc(RequireOwnership = false)]
+    private void ConfirmClientConnection(ulong clientId)
     {
-        _playerReadyStates[userData] = isReady; // Update the user's ready status
-    Debug.Log($"User: {userData.Name}, Ready Status: {isReady}");
-        CheckAllPlayersReady(); // Re-evaluate if all players are ready
-    }
+        confirmedClients.Add(clientId);
+        ChangeToGameScene();
 
-    private void CheckAllPlayersReady()
-    {
-        bool allReady = _playerReadyStates.Values.All(ready => ready);
-        startGameButton.gameObject.SetActive(lobbyManager.IsPlayerOwner && allReady);
-    }
-
-    public void OnStartGameButtonPressed()
-    {
-        if (lobbyManager.IsPlayerOwner && partyLobbyControl.allReady)
+        if (confirmedClients.Count == lobbyManager.Lobby.Members.Length)
         {
-            Debug.Log("Starting the game as host...");
-            networkManager.ServerManager.StartConnection();
-            networkManager.ClientManager.StartConnection();
-
-            StartGameClientRpc();
+            Debug.Log("All clients confirmed. Starting the game...");
             ChangeToGameScene();
-        }
-        else
-        {
-            Debug.LogWarning("Cannot start the game; not all players are ready.");
         }
     }
 
@@ -166,37 +174,14 @@ public class MenuManager : NetworkBehaviour
     public void OnUserJoin(UserData userData)
     {
         SetupCard(userData);
-        _playerReadyStates[userData] = false; // Set the new user as not ready
     }
 
-    private void OnUserLeft(UserLobbyLeaveData userLeaveData)
-    {
-        if(!_lobbyUserPanels.TryGetValue(userLeaveData.user, out LobbyUserPanel panel))
-        {
-            Debug.LogError("Tried to remove user that doesn't exist");
-            return;
-        }
 
-        Destroy(panel.gameObject);
-        _lobbyUserPanels.Remove(userLeaveData.user);
-        _playerReadyStates.Remove(userLeaveData.user); // Remove from ready states
-        CheckAllPlayersReady(); // Re-evaluate if all players are ready
-    }
-
-    private void ClearCards()
-    {
-        foreach (Transform child in lobbyuserHolder)
-        {
-            Destroy(child.gameObject);
-        }
-        _lobbyUserPanels.Clear();
-    }
 
     private void SetupCard(UserData userData)
     {
         var userPanel = Instantiate(lobbyUserPanelPrefab, lobbyuserHolder);
         userPanel.Initialize(userData);
-        _lobbyUserPanels.TryAdd(userData, userPanel);
     }
 
     // Convert the room ID to a Base64 string for shorter display

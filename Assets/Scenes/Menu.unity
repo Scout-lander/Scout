@@ -828,7 +828,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _serverBindAddress: 
   _port: 7770
-  _maximumClients: 9001
+  _maximumClients: 10
   _peerToPeer: 1
   _clientAddress: 
 --- !u!114 &507932171
@@ -843,7 +843,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 211a9f6ec51ddc14f908f5acc0cd0423, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _playerPrefab: {fileID: 0}
+  _playerPrefab: {fileID: 7988357472333692743, guid: 62bb52c2eb9319e4ba3136785a3973f7, type: 3}
   _addToDefaultScene: 1
   Spawns: []
 --- !u!114 &507932172
@@ -927,7 +927,8 @@ MonoBehaviour:
   _moveObject: 1
   _moveAllObjects: 0
   _replaceOption: 2
-  _scenes: []
+  _scenes:
+  - Game
   _connectionOnly: 0
   _automaticallyUnload: 1
   _onTriggerEnter: 1
@@ -3117,6 +3118,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 591051091004367919, guid: 57140e9e37426e642b13cc3df4ca0a6d, type: 3}
   m_PrefabInstance: {fileID: 1535691395}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1535691397 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 591051091004367923, guid: 57140e9e37426e642b13cc3df4ca0a6d, type: 3}
+  m_PrefabInstance: {fileID: 1535691395}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab5d0415dd60a70468801e371fb7dec2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1552869251
 GameObject:
   m_ObjectHideFlags: 0
@@ -3438,7 +3450,7 @@ MonoBehaviour:
   lobbyuserHolder: {fileID: 40197877}
   networkManager: {fileID: 507932173}
   gameSceneName: Game
-  partyLobbyControl: {fileID: 0}
+  partyLobbyControl: {fileID: 1535691397}
 --- !u!4 &1818307629
 Transform:
   m_ObjectHideFlags: 0
