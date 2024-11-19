@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using HeathenEngineering.SteamworksIntegration;
 using TMPro;
 using UnityEngine;
@@ -33,10 +32,11 @@ public class MenuManager : NetworkBehaviour
     [SerializeField] private string gameSceneName = "Game"; // The name of the game scene to load
 
     [Header("Party Lobby Control")]
-    [SerializeField] private PartyLobbyControl partyLobbyControl; // Reference to PartyLobbyControl
+    [SerializeField] private LobbyUIControl partyLobbyControl; // Reference to PartyLobbyControl
     private HashSet<ulong> confirmedClients = new HashSet<ulong>(); // Track confirmed clients
 
-
+    [Header("Join Game")]
+    [SerializeField] private GameObject joinGameButton; // Reference to the "Join Game" button for clients
 
     private void Awake()
     {
@@ -44,8 +44,8 @@ public class MenuManager : NetworkBehaviour
         HeathenEngineering.SteamworksIntegration.API.Overlay.Client.EventGameLobbyJoinRequested.AddListener(OverlayJoinButton);
 
         joinRoomButton.onClick.AddListener(JoinRoomByID);
-
-
+        startGameButton.onClick.AddListener(OnStartGameButtonPressed);
+        joinGameButton.SetActive(false); // Hide the join game button initially
     }
 
     public void OnLobbyCreated(LobbyData lobbyData)
@@ -53,7 +53,6 @@ public class MenuManager : NetworkBehaviour
         lobbyData.Name = UserData.Me.Name + "'s Lobby";
         lobbyTitle.text = lobbyData.Name;
 
-        // Convert SteamId to a ulong and then to a shorter Base64 string for display
         string shortRoomId = ConvertRoomIdToBase64(lobbyData.SteamId.m_SteamID);
         roomIDDisplay.text = "Room ID: " + shortRoomId;
 
@@ -61,12 +60,10 @@ public class MenuManager : NetworkBehaviour
         SetupCard(UserData.Me);
     }
 
-
     public void OnLobbyJoined(LobbyData lobbyData)
     {
         lobbyTitle.text = lobbyData.Name;
 
-        // Convert SteamId to a ulong and then to a shorter Base64 string for display
         string shortRoomId = ConvertRoomIdToBase64(lobbyData.SteamId.m_SteamID);
         roomIDDisplay.text = "Room ID: " + shortRoomId;
 
@@ -81,10 +78,15 @@ public class MenuManager : NetworkBehaviour
 
     public void OnStartGameButtonPressed()
     {
-        if (lobbyManager.IsPlayerOwner && partyLobbyControl.allReady)
+        if (lobbyManager.IsPlayerOwner)
         {
             Debug.Log("Starting the game as host...");
+            
+            // Start the server
             networkManager.ServerManager.StartConnection();
+
+            // Start the host as a client
+            networkManager.ClientManager.StartConnection();
 
             if (lobbyManager.Lobby.Members.Length == 1) // Solo case
             {
@@ -93,34 +95,41 @@ public class MenuManager : NetworkBehaviour
             else
             {
                 partyLobbyControl.SetLobbyGameReady(); // Set lobby to "game ready"
-                NotifyClientsToStartConnection();
+                ShowJoinGameButtonToClients(); // Notify clients to display the Join Game button
             }
         }
         else
         {
-            Debug.LogWarning("Cannot start the game; not all players are ready.");
+            Debug.LogWarning("Only the host can start the game.");
         }
-    }
+}
 
+    // Notify clients to display the "Join Game" button
     [ObserversRpc]
-    private void NotifyClientsToStartConnection()
+    private void ShowJoinGameButtonToClients()
     {
-        Debug.Log("Notifying clients to connect to FishNet...");
-        StartGameClientRpc(); // Clients will now connect and change scenes
+        Debug.Log("Displaying Join Game button for clients...");
+        DisplayJoinGameButton(); // Clients will now see a button to join the game
     }
 
+    // Method to handle "Join Game" button pressed by clients
     [ServerRpc(RequireOwnership = false)]
-    public void StartGameClientRpc()
+    public void JoinGameButtonPressed()
     {
         networkManager.ClientManager.StartConnection();
-        ChangeToGameScene();
+        ConfirmClientConnection(UserData.Me.SteamId);
     }
 
-    [ServerRpc(RequireOwnership = false)]
+    // On client side, displays the Join Game button
+    private void DisplayJoinGameButton()
+    {
+        joinGameButton.SetActive(true);
+        joinGameButton.GetComponent<Button>().onClick.AddListener(() => JoinGameButtonPressed());
+    }
+
     private void ConfirmClientConnection(ulong clientId)
     {
         confirmedClients.Add(clientId);
-        ChangeToGameScene();
 
         if (confirmedClients.Count == lobbyManager.Lobby.Members.Length)
         {
@@ -149,6 +158,7 @@ public class MenuManager : NetworkBehaviour
     {
         mainMenuObject.SetActive(false);
         lobbyObject.SetActive(false);
+        joinGameButton.SetActive(false); // Ensure join game button is hidden when switching screens
     }
 
     public void OverlayJoinButton(LobbyData lobbyData, UserData data)
@@ -161,7 +171,6 @@ public class MenuManager : NetworkBehaviour
         string shortRoomId = roomIDInput.text;
         try
         {
-            // Convert the short code back to the original room ID
             ulong roomId = ConvertBase64ToRoomId(shortRoomId);
             lobbyManager.Join(roomId);
         }
@@ -176,32 +185,28 @@ public class MenuManager : NetworkBehaviour
         SetupCard(userData);
     }
 
-
-
     private void SetupCard(UserData userData)
     {
         var userPanel = Instantiate(lobbyUserPanelPrefab, lobbyuserHolder);
         userPanel.Initialize(userData);
     }
 
-    // Convert the room ID to a Base64 string for shorter display
     private string ConvertRoomIdToBase64(ulong roomId)
     {
         byte[] bytes = System.BitConverter.GetBytes(roomId);
         string base64String = System.Convert.ToBase64String(bytes)
-                               .Replace("=", "") // Remove padding characters
-                               .Replace("+", "-") // Replace '+' with '-' for URL safety
-                               .Replace("/", "_"); // Replace '/' with '_'
+                               .Replace("=", "")
+                               .Replace("+", "-")
+                               .Replace("/", "_");
         return base64String;
     }
 
-    // Convert the shortened Base64 string back to the original room ID
     private ulong ConvertBase64ToRoomId(string base64String)
     {
         base64String = base64String
                        .Replace("-", "+")
                        .Replace("_", "/");
-        byte[] bytes = System.Convert.FromBase64String(base64String + "=="); // Add padding if needed
+        byte[] bytes = System.Convert.FromBase64String(base64String + "==");
         return System.BitConverter.ToUInt64(bytes, 0);
     }
 }
