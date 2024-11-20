@@ -63,17 +63,21 @@ public class MainMenuManager : MonoBehaviour
     }
 
     private void OverlayJoinButton(LobbyData lobbyData, UserData user)
-{
-    Debug.Log($"Trying to join lobby with ID: {lobbyData.Owner}, Name: {lobbyData.Name}, Members: {lobbyData.Members}");
-    if (lobbyManager != null)
     {
-        lobbyManager.Join(lobbyData);
+        Debug.Log($"Trying to join lobby with ID: {lobbyData.Owner}, Name: {lobbyData.Name}");
+        Debug.Log($"Current members: {lobbyData.Members}, Max members: {lobbyData.MaxMembers}");
+
+        if (lobbyManager != null)
+        {
+            
+
+            lobbyManager.Join(lobbyData);
+        }
+        else
+        {
+            Debug.LogError("LobbyManager not found! Cannot join the lobby.");
+        }
     }
-    else
-    {
-        Debug.LogError("LobbyManager not found! Cannot join the lobby.");
-    }
-}
 
 
     public void HostGame()
@@ -90,16 +94,18 @@ public class MainMenuManager : MonoBehaviour
 
     public void ConfirmLobbySetup()
     {
+        // Fixed slots to 8
+        slots = 8;
+
         // Gather settings from UI inputs
         lobbyName = lobbyNameInput.text;
-        //slots = int.Parse(slotDropdown.options[slotDropdown.value].text);
         lobbyType = GetLobbyType(typeDropdown.value);
 
-        Debug.Log($"Creating lobby: {lobbyName} | Slots: {slots} | Type: {lobbyType}");
+        Debug.Log($"Creating lobby: {lobbyName} | Slots: {slots} (fixed) | Type: {lobbyType}");
 
         // Set the LobbyManager's creation arguments
         lobbyManager.createArguments.name = lobbyName;
-        //lobbyManager.createArguments.slots = slots;
+        lobbyManager.createArguments.slots = slots;
         lobbyManager.createArguments.type = lobbyType;
 
         // Use LobbyManager to create the lobby
