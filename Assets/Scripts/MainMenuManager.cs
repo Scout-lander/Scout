@@ -52,6 +52,7 @@ public class MainMenuManager : MonoBehaviour
             Debug.LogError("LobbyManager not found in the scene.");
         }
 
+        lobbyManager.evtEnterSuccess.AddListener(OnLobbyEntered);
         HeathenEngineering.SteamworksIntegration.API.Overlay.Client.EventGameLobbyJoinRequested.AddListener(OverlayJoinButton);
     }
 
@@ -65,6 +66,12 @@ public class MainMenuManager : MonoBehaviour
     {
         Debug.Log("Opening lobby setup screen...");
         lobbySetupPanel.SetActive(true); // Show lobby setup panel
+    }
+
+    private void OnLobbyEntered(LobbyData lobbyData)
+    {
+        Debug.Log($"Successfully joined lobby: {lobbyData.Name} with ID: {lobbyData.Owner}");
+        SceneManager.LoadScene("LobbyScreen");
     }
 
     public void ConfirmLobbySetup()
