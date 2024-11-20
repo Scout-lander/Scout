@@ -57,12 +57,8 @@ public class MainMenuManager : MonoBehaviour
 
     private void OverlayJoinButton(LobbyData lobbyData, UserData user)
     {
+        Debug.Log("Trying To join...");
         lobbyManager.Join(lobbyData);
-    }
-
-    private void Start()
-    {
-
     }
 
     public void HostGame()
@@ -95,7 +91,11 @@ public class MainMenuManager : MonoBehaviour
         Debug.Log("Lobby created successfully. Moving to lobby screen...");
         SceneManager.LoadScene("LobbyScreen"); // Load lobby scene
     }
-
+    public void OtherUserJoin()
+    {
+        Debug.Log("LYou Have joint Lobby");
+        SceneManager.LoadScene("LobbyScreen"); // Load lobby scene
+    }
     public void OnLobbyJoin()
     {
         SceneManager.LoadScene("LobbyScreen"); // Load lobby scene
