@@ -3729,7 +3729,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f314bc6f3466b54da82e29cdd36fe44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Delegates: 0600000003000000090000000200000004000000
+  m_Delegates: 06000000030000000900000002000000040000000a000000
   searchArguments:
     slots: -1
     distance: 1
@@ -3746,20 +3746,7 @@ MonoBehaviour:
   richPresenceFields: []
   evtLobbyInvite:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1485675227}
-        m_TargetAssemblyTypeName: HeathenEngineering.SteamworksIntegration.LobbyManager,
-          Heathen.Steamworks
-        m_MethodName: 
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   evtChatMsgReceived:
     m_PersistentCalls:
       m_Calls: []
@@ -3768,19 +3755,7 @@ MonoBehaviour:
       m_Calls: []
   evtEnterSuccess:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1485675228}
-        m_TargetAssemblyTypeName: MainMenuManager, Assembly-CSharp
-        m_MethodName: OnLobbyEntered
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   evtEnterFailed:
     m_PersistentCalls:
       m_Calls: []
@@ -3801,19 +3776,7 @@ MonoBehaviour:
         m_CallState: 2
   evtCreateFailed:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1485675227}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: 
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   evtQuickMatchFailed:
     m_PersistentCalls:
       m_Calls: []
@@ -3831,7 +3794,19 @@ MonoBehaviour:
       m_Calls: []
   evtUserJoined:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1485675228}
+        m_TargetAssemblyTypeName: MainMenuManager, Assembly-CSharp
+        m_MethodName: OnLobbyJoin
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   evtUserLeft:
     m_PersistentCalls:
       m_Calls: []
@@ -4239,6 +4214,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1485675229}
   - component: {fileID: 1485675228}
+  - component: {fileID: 1485675230}
   m_Layer: 0
   m_Name: MainMenuManger
   m_TagString: Untagged
@@ -4282,6 +4258,46 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1485675230
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1485675227}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f820fe673f3d47246905dad17647475b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates: 00000000
+  notificationPosition: 1
+  notificationInset: {x: 0, y: 0}
+  evtOverlayActivated:
+    m_PersistentCalls:
+      m_Calls: []
+  evtGameLobbyJoinRequested:
+    m_PersistentCalls:
+      m_Calls: []
+  evtGameServerChangeRequested:
+    m_PersistentCalls:
+      m_Calls: []
+  evtRichPresenceJoinRequested:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1263525006}
+        m_TargetAssemblyTypeName: HeathenEngineering.SteamworksIntegration.LobbyManager,
+          Heathen.Steamworks
+        m_MethodName: Join
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &1497322572
 GameObject:
   m_ObjectHideFlags: 0
@@ -4660,13 +4676,13 @@ MonoBehaviour:
   m_Value: 0
   m_Options:
     m_Options:
-    - m_Text: 1
-      m_Image: {fileID: 0}
-    - m_Text: 2
+    - m_Text: 4
       m_Image: {fileID: 0}
     - m_Text: 3
       m_Image: {fileID: 0}
-    - m_Text: 4
+    - m_Text: 2
+      m_Image: {fileID: 0}
+    - m_Text: 1
       m_Image: {fileID: 0}
   m_OnValueChanged:
     m_PersistentCalls:
@@ -5105,7 +5121,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 1
+  m_text: 4
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

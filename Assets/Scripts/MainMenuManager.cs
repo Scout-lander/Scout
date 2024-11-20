@@ -18,18 +18,19 @@ public class MainMenuManager : MonoBehaviour
     public TMP_Dropdown slotDropdown;      // TextMeshPro Dropdown
     public TMP_Dropdown typeDropdown;      // TextMeshPro Dropdown
     public Button confirmButton;
-    
 
     private string lobbyName;
     private int slots;
     private ELobbyType lobbyType;
-    [SerializeField]private LobbyManager lobbyManager; 
-    [SerializeField]private NetworkManager networkManager;
+    [SerializeField] private LobbyManager lobbyManager;
+    [SerializeField] private NetworkManager networkManager;
     [SerializeField] private FishySteamworks.FishySteamworks fishySteamworks;
 
     private void Awake()
     {
-        
+        MainMenuUI.SetActive(true);
+        lobbySetupPanel.SetActive(false);
+
         // Attempt to find or assign NetworkManager
         networkManager = FindObjectOfType<NetworkManager>();
         if (networkManager == null)
@@ -51,36 +52,25 @@ public class MainMenuManager : MonoBehaviour
             Debug.LogError("LobbyManager not found in the scene.");
         }
 
-        HeathenEngineering.SteamworksIntegration.API.Overlay.Client.EventGameLobbyJoinRequested.AddListener(OverLayJoinButton);
+        HeathenEngineering.SteamworksIntegration.API.Overlay.Client.EventGameLobbyJoinRequested.AddListener(OverlayJoinButton);
     }
 
-    private void OverLayJoinButton(LobbyData lobbyData, UserData user)
+    private void OverlayJoinButton(LobbyData lobbyData, UserData user)
     {
         lobbyManager.Join(lobbyData);
     }
 
-    public void OnLobbyEntered(LobbyData lobbyData)
-    {
-        Debug.Log($"Joined lobby: {lobbyData.Name} | Slots: {lobbyData.MaxMembers} | Members: {lobbyData.Members}");
-        
-        // Load the lobby screen or update the UI
-        SceneManager.LoadScene("LobbyScreen"); // Replace with your lobby scene name
-    }
-
     private void Start()
     {
-        MainMenuUI.SetActive(true);
-        lobbySetupPanel.SetActive(false); // Hide lobby setup initially
+
     }
 
-    // Method to open the lobby settings screen
     public void HostGame()
     {
         Debug.Log("Opening lobby setup screen...");
         lobbySetupPanel.SetActive(true); // Show lobby setup panel
     }
 
-    // Method to confirm lobby setup and create the lobby
     public void ConfirmLobbySetup()
     {
         // Gather settings from UI inputs
@@ -97,24 +87,25 @@ public class MainMenuManager : MonoBehaviour
 
         // Use LobbyManager to create the lobby
         lobbyManager.Create();
-        fishySteamworks.StartConnection(true); //Starts as server
+        fishySteamworks.StartConnection(true); // Starts as server
     }
 
-    // Event handler for successful lobby creation
     public void OnLobbyCreated(LobbyData lobbyData)
     {
         Debug.Log("Lobby created successfully. Moving to lobby screen...");
         SceneManager.LoadScene("LobbyScreen"); // Load lobby scene
     }
 
-    // Event handler for lobby creation failure
+    public void OnLobbyJoin()
+    {
+        SceneManager.LoadScene("LobbyScreen"); // Load lobby scene
+    }
     public void OnLobbyCreationFailed(LobbyData lobbyData)
     {
         Debug.LogError("Failed to create lobby.");
         // Optionally, show an error message to the player
     }
 
-    // Helper method to map dropdown selection to ELobbyType
     private ELobbyType GetLobbyType(int index)
     {
         switch (index)
