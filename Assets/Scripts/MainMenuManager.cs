@@ -20,7 +20,7 @@ public class MainMenuManager : MonoBehaviour
     public Button confirmButton;
 
     private string lobbyName;
-    private int slots;
+    private int slots = 8;
     private ELobbyType lobbyType;
     [SerializeField] private LobbyManager lobbyManager;
     [SerializeField] private NetworkManager networkManager;
