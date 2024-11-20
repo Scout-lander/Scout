@@ -3729,7 +3729,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f314bc6f3466b54da82e29cdd36fe44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Delegates: 06000000030000000900000002000000
+  m_Delegates: 0600000003000000090000000200000004000000
   searchArguments:
     slots: -1
     distance: 1
@@ -3746,7 +3746,19 @@ MonoBehaviour:
   richPresenceFields: []
   evtLobbyInvite:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: 
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   evtChatMsgReceived:
     m_PersistentCalls:
       m_Calls: []

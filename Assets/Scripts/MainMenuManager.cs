@@ -49,8 +49,14 @@ public class MainMenuManager : MonoBehaviour
         {
             Debug.LogError("LobbyManager not found in the scene.");
         }
+
+        HeathenEngineering.SteamworksIntegration.API.Overlay.Client.EventGameLobbyJoinRequested.AddListener(OverlayJoinButton);
     }
 
+    public void OverlayJoinButton(LobbyData lobbyData, UserData user)
+    {
+        lobbyManager.Join(lobbyData);
+    }
     private void Start()
     {
         MainMenuUI.SetActive(true);
