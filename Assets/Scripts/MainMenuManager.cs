@@ -50,12 +50,35 @@ public class MainMenuManager : MonoBehaviour
             Debug.LogError("LobbyManager not found in the scene.");
         }
 
+        // Listen for game lobby invites and join requests
         HeathenEngineering.SteamworksIntegration.API.Overlay.Client.EventGameLobbyJoinRequested.AddListener(OverlayJoinButton);
     }
 
+    // Method to handle Steam overlay "Join Game" button press
     public void OverlayJoinButton(LobbyData lobbyData, UserData user)
     {
-        lobbyManager.Join(lobbyData);
+        Debug.Log("Join request via Steam overlay received.");
+        JoinLobby(lobbyData);
+    }
+
+    // Method to handle Steam lobby invites
+    private void OnLobbyInviteReceived(LobbyData lobbyData)
+    {
+        Debug.Log("Lobby invite received. Joining lobby...");
+        JoinLobby(lobbyData);
+    }
+
+    // Method to join the specified lobby
+    private void JoinLobby(LobbyData lobbyData)
+    {
+        if (lobbyManager != null)
+        {
+            lobbyManager.Join(lobbyData);
+        }
+        else
+        {
+            Debug.LogError("LobbyManager not found. Unable to join the lobby.");
+        }
     }
     private void Start()
     {
