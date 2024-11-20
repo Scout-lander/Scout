@@ -53,14 +53,28 @@ public class MainMenuManager : MonoBehaviour
         }
 
         lobbyManager.evtEnterSuccess.AddListener(OnLobbyEntered);
+        lobbyManager.evtEnterFailed.AddListener(OnLobbyJoinFailed);
         HeathenEngineering.SteamworksIntegration.API.Overlay.Client.EventGameLobbyJoinRequested.AddListener(OverlayJoinButton);
     }
 
-    private void OverlayJoinButton(LobbyData lobbyData, UserData user)
+    private void OnLobbyJoinFailed(EChatRoomEnterResponse result)
     {
-        Debug.Log("Trying To join...");
+        Debug.LogError($"Failed to join lobby. Error: {result}");
+    }
+
+    private void OverlayJoinButton(LobbyData lobbyData, UserData user)
+{
+    Debug.Log($"Trying to join lobby with ID: {lobbyData.Owner}, Name: {lobbyData.Name}, Members: {lobbyData.Members}");
+    if (lobbyManager != null)
+    {
         lobbyManager.Join(lobbyData);
     }
+    else
+    {
+        Debug.LogError("LobbyManager not found! Cannot join the lobby.");
+    }
+}
+
 
     public void HostGame()
     {
@@ -78,14 +92,14 @@ public class MainMenuManager : MonoBehaviour
     {
         // Gather settings from UI inputs
         lobbyName = lobbyNameInput.text;
-        slots = int.Parse(slotDropdown.options[slotDropdown.value].text);
+        //slots = int.Parse(slotDropdown.options[slotDropdown.value].text);
         lobbyType = GetLobbyType(typeDropdown.value);
 
         Debug.Log($"Creating lobby: {lobbyName} | Slots: {slots} | Type: {lobbyType}");
 
         // Set the LobbyManager's creation arguments
         lobbyManager.createArguments.name = lobbyName;
-        lobbyManager.createArguments.slots = slots;
+        //lobbyManager.createArguments.slots = slots;
         lobbyManager.createArguments.type = lobbyType;
 
         // Use LobbyManager to create the lobby

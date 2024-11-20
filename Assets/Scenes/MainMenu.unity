@@ -3739,7 +3739,7 @@ MonoBehaviour:
   createArguments:
     usageHint: 2
     name: 
-    slots: 0
+    slots: 4
     type: 1
     metadata: []
     richPresenceFields: []
