@@ -29,6 +29,7 @@ public class MainMenuManager : MonoBehaviour
 
     private void Awake()
     {
+        
         // Attempt to find or assign NetworkManager
         networkManager = FindObjectOfType<NetworkManager>();
         if (networkManager == null)
@@ -50,36 +51,22 @@ public class MainMenuManager : MonoBehaviour
             Debug.LogError("LobbyManager not found in the scene.");
         }
 
-        // Listen for game lobby invites and join requests
-        HeathenEngineering.SteamworksIntegration.API.Overlay.Client.EventGameLobbyJoinRequested.AddListener(OverlayJoinButton);
+        HeathenEngineering.SteamworksIntegration.API.Overlay.Client.EventGameLobbyJoinRequested.AddListener(OverLayJoinButton);
     }
 
-    // Method to handle Steam overlay "Join Game" button press
-    public void OverlayJoinButton(LobbyData lobbyData, UserData user)
+    private void OverLayJoinButton(LobbyData lobbyData, UserData user)
     {
-        Debug.Log("Join request via Steam overlay received.");
-        JoinLobby(lobbyData);
+        lobbyManager.Join(lobbyData);
     }
 
-    // Method to handle Steam lobby invites
-    private void OnLobbyInviteReceived(LobbyData lobbyData)
+    public void OnLobbyEntered(LobbyData lobbyData)
     {
-        Debug.Log("Lobby invite received. Joining lobby...");
-        JoinLobby(lobbyData);
+        Debug.Log($"Joined lobby: {lobbyData.Name} | Slots: {lobbyData.MaxMembers} | Members: {lobbyData.Members}");
+        
+        // Load the lobby screen or update the UI
+        SceneManager.LoadScene("LobbyScreen"); // Replace with your lobby scene name
     }
 
-    // Method to join the specified lobby
-    private void JoinLobby(LobbyData lobbyData)
-    {
-        if (lobbyManager != null)
-        {
-            lobbyManager.Join(lobbyData);
-        }
-        else
-        {
-            Debug.LogError("LobbyManager not found. Unable to join the lobby.");
-        }
-    }
     private void Start()
     {
         MainMenuUI.SetActive(true);
@@ -103,9 +90,6 @@ public class MainMenuManager : MonoBehaviour
 
         Debug.Log($"Creating lobby: {lobbyName} | Slots: {slots} | Type: {lobbyType}");
 
-        // Start the FishNet server
-       // networkManager.ServerManager.StartServer();
-
         // Set the LobbyManager's creation arguments
         lobbyManager.createArguments.name = lobbyName;
         lobbyManager.createArguments.slots = slots;
@@ -114,8 +98,6 @@ public class MainMenuManager : MonoBehaviour
         // Use LobbyManager to create the lobby
         lobbyManager.Create();
         fishySteamworks.StartConnection(true); //Starts as server
-        //fishySteamworks.StartConnection(false); //joins as client
-
     }
 
     // Event handler for successful lobby creation
